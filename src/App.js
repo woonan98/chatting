@@ -7,18 +7,23 @@ const App = () => {
   const [init, setInit] = useState(false);
   const [isLoggined, setIsLoggined] = useState(false);
   const [userObj, setUserObj] = useState("");
+
+
   useEffect(()=>{
     onAuthStateChanged(authService, (user) => {
-      setUserObj({
-        displayName : user.displayName,
-        email : user.email,
-        uid : user.uid,
-        photoURL : user.photoURL,
-      });
-      setIsLoggined(true);
       setInit(true);
+      if (user) {
+        setUserObj({
+          displayName : user.displayName,
+          email : user.email,
+          uid : user.uid,
+          photoURL : user.photoURL,
+        });
+        setIsLoggined(true);
+      }
     });
   }, []);
+  console.log(isLoggined);
   return (
     <div>
       { init ? <AppRouter userObj={userObj} isLoggined={isLoggined} /> : "initalizing"}
