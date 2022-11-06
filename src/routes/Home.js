@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
 import { authService } from 'fbase';
 import { signOut } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
 import Profile from 'components/Profile/Profile';
+import EditProfile from 'components/EditProfile/EditProfile';
 
 const Home = ({ userObj }) => {
-
-    const navigate = useNavigate();
-
-    const onClickSignOut = () => {
-        signOut(authService);
-        
-    }
+    const [edit, setEdit] = useState(false);
 
     return (
         <>
-            <Profile userObj={userObj} />
+                <Profile userObj={userObj} edit={edit} />
         </>
     )
 }
