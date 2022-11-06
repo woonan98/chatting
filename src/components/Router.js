@@ -15,7 +15,7 @@ const AppRouter = ({ isLoggined, userObj }) => {
                 :   <Route path="/" element={<Auth />} />
                     }
                     <Route path="/Sign" element={<Sign />} />
-                    <Route path="/chat" element={<Chatting />} />
+                    <Route path="/chat" element={<Chatting userObj={userObj} />} />
                 </Routes>
             </Router>
         </>

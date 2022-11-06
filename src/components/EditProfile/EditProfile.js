@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { authService } from 'fbase';
 import { updateProfile } from 'firebase/auth';
 
-const EditProfile = ({ userObj, setEdit, edit }) => {
+const EditProfile = ({ userObj, setEdit }) => {
     const [changeName, setChangeName] = useState(userObj.displayName);
     const [fileImage, setFileImage] = useState(userObj.photoURL);
 
@@ -26,9 +26,9 @@ const EditProfile = ({ userObj, setEdit, edit }) => {
             displayName: `${changeName}`, photoURL: `${fileImage}`
         })
         setEdit(false);
+        window.location.reload(true);
     }
 
-    console.log(changeName);
     return (
         <>
             <form>

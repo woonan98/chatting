@@ -20,6 +20,7 @@ const Profile = ({ userObj }) => {
     const onClickEdit = () => {
         setEdit(true);
     }
+    console.log(userObj.photoURL)
 
     return (
         <>

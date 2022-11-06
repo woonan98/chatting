@@ -1,10 +1,15 @@
 import React from 'react';
-import Profile from 'components/Profile/Profile';
 
-const Chatting = () => {
+
+const Chatting = ({ userObj }) => {
+    console.log(userObj.photoURL);
     return(
         <>
-            
+            <div>
+                <img src={userObj.photoURL} width="150px" style={{ borderRadius : "50%" }} />
+                <p>{userObj.displayName}</p>
+                
+            </div>
         </>
     )
 }
