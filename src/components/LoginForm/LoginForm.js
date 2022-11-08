@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { authService } from 'fbase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 const LoginForm = () => {
     const [userId, setUserId] = useState("");
@@ -10,6 +12,17 @@ const LoginForm = () => {
             setUserId(value);
         } else if (name == "password"){
             setPassword(value);
+        }
+    }
+    
+    const onSubmit = async(e) => {
+        e.preventDefault();
+        try {
+            await signInWithEmailAndPassword(
+                authService, userId, password
+            )
+        } catch (e) {
+            console.log(e);
         }
     }
 
@@ -27,7 +40,10 @@ const LoginForm = () => {
                         value={password}
                         name="password"
                     />
-                    <input type="submit" />
+                    <input 
+                        type="submit" 
+                        onClick={onSubmit}
+                    />
                 </div>
             </form>
         </>

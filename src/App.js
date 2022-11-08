@@ -20,6 +20,7 @@ const App = () => {
           photoURL : user.photoURL,
         });
         setIsLoggined(true);
+        console.log(user);
       }
     });
   }, []);

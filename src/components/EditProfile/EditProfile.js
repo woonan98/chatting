@@ -1,23 +1,27 @@
 import React, { useState } from 'react';
-import { authService } from 'fbase';
+import { authService, storage, db } from 'fbase';
 import { updateProfile } from 'firebase/auth';
+import { collection, addDoc } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 
 const EditProfile = ({ userObj, setEdit }) => {
     const [changeName, setChangeName] = useState(userObj.displayName);
-    const [fileImage, setFileImage] = useState(userObj.photoURL);
+    const [fileImage, setFileImage] = useState("");
 
     const onChangeInput = (e) => {
         const { target : { value } } = e;
         setChangeName(value);
     }
 
-    const saveFileImage = (e) => {
-        setFileImage(URL.createObjectURL(e.target.files[0]));
-    }
-
-    const deleteFileImage = () => {
-        URL.revokeObjectURL(fileImage);
-        setFileImage("");
+    const onChangeFile = (e) => {
+        const { target : { files } } = e;
+        const theFile = files[0];
+        const reader = new FileReader();
+        reader.onloadend = (finishedEvent) => {
+            const { currentTarget : { result } } = finishedEvent;
+            setFileImage(result);
+        }
+        reader.readAsDataURL(theFile);
     }
 
     const onClickUpdateProfile = async(e) => {
@@ -29,19 +33,33 @@ const EditProfile = ({ userObj, setEdit }) => {
         window.location.reload(true);
     }
 
+    const onClickStorage = async(e) => {
+        e.preventDefault();
+        let attachmentURL = "";
+            try {
+                const imagesRef = ref(storage, `${userObj.uid}/avartar`);
+                const response = await uploadString(imagesRef, fileImage, 'data_url')
+                attachmentURL = await getDownloadURL(response.ref);
+            } catch (error) {
+                console.log(error);
+            }
+    }
+
+
     return (
         <>
             <form>
-                {fileImage &&
+                { fileImage &&
                     <img 
-                        src={fileImage}
-                        width="50px"
-                        heihgt="50px"
-                    />
+                    src={fileImage}
+                    width="150px"
+                    heihgt="50px"
+                    style={{ borderRadius : "50%" }}
+                />
                 }
                 <input type="file" 
                     accept="image/*"
-                    onChange={saveFileImage}   
+                    onChange={onChangeFile}   
                 />
                 <input 
                     type="text"
@@ -52,6 +70,7 @@ const EditProfile = ({ userObj, setEdit }) => {
                 onClick={onClickUpdateProfile}
             />
             </form>
+            <button onClick={onClickStorage}>asd</button>
         </>
     )
 }

@@ -11,6 +11,7 @@ const Profile = ({ userObj }) => {
 
     const onClickSignOut = () => {
         signOut(authService);
+        window.location.reload();
     }
 
     const onClickChat = () => {
@@ -20,7 +21,6 @@ const Profile = ({ userObj }) => {
     const onClickEdit = () => {
         setEdit(true);
     }
-    console.log(userObj.photoURL)
 
     return (
         <>
