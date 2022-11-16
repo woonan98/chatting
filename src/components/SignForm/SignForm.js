@@ -21,11 +21,11 @@ const SignForm = () => {
                 );
                 const avatarRef = await ref(storage, `${data.user.uid}/avatar`);
                 const response = await uploadString(avatarRef, avatar, 'data_url');
-                avatarUrl = await getDownloadURL(response.ref)
+                avatarUrl = await getDownloadURL(response.ref);
                 const userData = {
                     avatarUrl,
                     userId : data.user.uid
-                }
+                };
                 await setDoc(newUserRef, userData);
                 await updateProfile(data.user, {
                     displayName: `${nickName}`, photoURL : `${avatarUrl}`

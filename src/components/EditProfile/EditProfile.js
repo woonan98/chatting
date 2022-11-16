@@ -1,12 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { authService, storage, db } from 'fbase';
 import { updateProfile } from 'firebase/auth';
-import { collection, addDoc } from 'firebase/firestore';
-import { getDownloadURL, ref, uploadString } from 'firebase/storage';
+import { doc, collection, where, query, getDocs, updateDoc } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadString, deleteObject } from 'firebase/storage';
 
 const EditProfile = ({ userObj, setEdit }) => {
     const [changeName, setChangeName] = useState(userObj.displayName);
     const [fileImage, setFileImage] = useState("");
+    const [userAvatar, setUserAvatar] = useState("");
+
+
+    useEffect(()=>{
+        const getUserDoc = async() => {
+            const q = query(collection(db, "user"), where("userId", "==", userObj.uid));
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                    setUserAvatar(doc.data().avatarUrl);
+            });
+        }
+        getUserDoc();
+    },[]);
+
 
     const onChangeInput = (e) => {
         const { target : { value } } = e;
@@ -26,36 +40,40 @@ const EditProfile = ({ userObj, setEdit }) => {
 
     const onClickUpdateProfile = async(e) => {
         e.preventDefault();
-        await updateProfile(authService.currentUser, {
-            displayName: `${changeName}`, photoURL: `${fileImage}`
-        })
+        if (fileImage === true){
+            const avatarRef = ref(storage, `${userObj.uid}/avatar`);
+            await deleteObject(avatarRef);
+            let attachmentURL = "";
+            const response = await uploadString(avatarRef, fileImage, 'data_url');
+            attachmentURL = await getDownloadURL(response.ref);
+            
+            await updateProfile(authService.currentUser, {
+                displayName: `${changeName}`, photoURL: `${attachmentURL}`
+            });
+        }
+        
         setEdit(false);
         window.location.reload(true);
     }
-
-    const onClickStorage = async(e) => {
-        e.preventDefault();
-        let attachmentURL = "";
-            try {
-                const imagesRef = ref(storage, `${userObj.uid}/avartar`);
-                const response = await uploadString(imagesRef, fileImage, 'data_url')
-                attachmentURL = await getDownloadURL(response.ref);
-            } catch (error) {
-                console.log(error);
-            }
-    }
-
+    
+    
+    
 
     return (
         <>
             <form>
-                { fileImage &&
+                { fileImage ?
                     <img 
-                    src={fileImage}
-                    width="150px"
-                    heihgt="50px"
-                    style={{ borderRadius : "50%" }}
-                />
+                        src={fileImage}
+                        width="150px"
+                        style={{ borderRadius : "50%" }}
+                    />
+                :       
+                    <img 
+                        src={userAvatar}
+                        width="150px"
+                        style={{ borderRadius : "50%" }} 
+                    />    
                 }
                 <input type="file" 
                     accept="image/*"
@@ -70,7 +88,7 @@ const EditProfile = ({ userObj, setEdit }) => {
                 onClick={onClickUpdateProfile}
             />
             </form>
-            <button onClick={onClickStorage}>asd</button>
+            <button onClick={testGetDoc}>test</button>
         </>
     )
 }
