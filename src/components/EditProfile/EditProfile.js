@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { authService, storage, db } from 'fbase';
 import { updateProfile } from 'firebase/auth';
-import { doc, collection, where, query, getDocs, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString, deleteObject } from 'firebase/storage';
 
 const EditProfile = ({ userObj, setEdit }) => {
@@ -12,11 +12,9 @@ const EditProfile = ({ userObj, setEdit }) => {
 
     useEffect(()=>{
         const getUserDoc = async() => {
-            const q = query(collection(db, "user"), where("userId", "==", userObj.uid));
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach((doc) => {
-                    setUserAvatar(doc.data().avatarUrl);
-            });
+            const userRef = doc(db, "user", `${userObj.uid}`);
+            const docSnap = await getDoc(userRef);
+            setUserAvatar(docSnap.data().avatarUrl);
         }
         getUserDoc();
     },[]);
@@ -40,24 +38,24 @@ const EditProfile = ({ userObj, setEdit }) => {
 
     const onClickUpdateProfile = async(e) => {
         e.preventDefault();
-        if (fileImage === true){
+        const ok = window.confirm("프로필을 변경하시겠습니까?");
+        if(ok) {
+            let attachmentURL = "";
             const avatarRef = ref(storage, `${userObj.uid}/avatar`);
             await deleteObject(avatarRef);
-            let attachmentURL = "";
             const response = await uploadString(avatarRef, fileImage, 'data_url');
             attachmentURL = await getDownloadURL(response.ref);
-            
+            const testRef = doc(db, "user", `${userObj.uid}`);
+            await updateDoc(testRef, {
+            avatarUrl: `${attachmentURL}`
+            });
             await updateProfile(authService.currentUser, {
                 displayName: `${changeName}`, photoURL: `${attachmentURL}`
             });
+            setEdit(false);
+            window.location.reload(true);
         }
-        
-        setEdit(false);
-        window.location.reload(true);
     }
-    
-    
-    
 
     return (
         <>
@@ -84,11 +82,10 @@ const EditProfile = ({ userObj, setEdit }) => {
                     value={changeName}
                     onChange={onChangeInput}    
                 />
-            <input type="submit"
-                onClick={onClickUpdateProfile}
-            />
+                <input type="submit"
+                    onClick={onClickUpdateProfile}
+                />
             </form>
-            <button onClick={testGetDoc}>test</button>
         </>
     )
 }

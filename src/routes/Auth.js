@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from 'fbase';
+import { authService, db, storage } from 'fbase';
 import { GoogleAuthProvider, GithubAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import LoginForm from 'components/LoginForm/LoginForm';
 
 const Auth = () => {
@@ -17,7 +18,13 @@ const Auth = () => {
         } else if (name === "github"){
             provider = new GithubAuthProvider();
         }
-        await signInWithPopup(authService, provider);
+        await signInWithPopup(authService, provider)
+        .then((result) => {
+            const user = result.user;
+            setDoc(doc(db, "user", `${user.uid}`), {
+                avatarUrl: user.photoURL
+            });
+        });
     }
 
     const onClickSign = () => {

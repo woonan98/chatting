@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { authService, storage, db } from 'fbase';
-import { doc, setDoc, collection } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 
 const SignForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [nickName, setNickName] = useState("");
     const [avatar, setAvatar] = useState("");
-    const newUserRef = doc(collection(db, "user"));
 
     const onSubmit = async(e) => {
         e.preventDefault();
@@ -24,9 +23,8 @@ const SignForm = () => {
                 avatarUrl = await getDownloadURL(response.ref);
                 const userData = {
                     avatarUrl,
-                    userId : data.user.uid
                 };
-                await setDoc(newUserRef, userData);
+                await setDoc(doc(db, "user", `${data.user.uid}`), userData);
                 await updateProfile(data.user, {
                     displayName: `${nickName}`, photoURL : `${avatarUrl}`
                 });
